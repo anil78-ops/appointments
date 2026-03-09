@@ -388,6 +388,3 @@ Deploy to AWS EKS
 Application Running in Kubernetes
 ```
 
----
-
-If you want, I can also show you how to add **GitHub badges (build passing, node version, docker, license)** at the top so your repository **looks like a production-grade DevOps project**.

@@ -19,7 +19,7 @@ spec:
       - name: appointments
         image: 303670280087.dkr.ecr.us-east-1.amazonaws.com/appointments:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 3001
         resources:
           requests:
             cpu: "50m"
@@ -39,5 +39,5 @@ spec:
     app: appointments
   ports:
   - port: 80
-    targetPort: 3000
+    targetPort: 3001
   type: ClusterIP

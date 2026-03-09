@@ -1,0 +1,60 @@
+name: Build and Deploy appointments Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_dev_OIDC_ARN }}
+          aws-region: ${{ secrets.AWS_dev_REGION }}
+          role-session-name: github-${{ matrix.env }}-${{ github.run_id }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set Image URI
+        run: |
+          echo "IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_dev_REGION }}.amazonaws.com/${{ github.event.repository.name }}:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: |
+          docker build -t $IMAGE_URI .
+
+      - name: Push Docker Image
+        run: |
+          docker push $IMAGE_URI
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_dev_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: Update image in manifest
+        run: |
+          sed -i "s|image:.*|image: $IMAGE_URI|g" manifests/appointments-dev.yaml
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'                
+
+      - name: Deploy to EKS
+        run: |
+          kubectl get nodes
+          kubectl get ns
+          kubectl apply -f manifests/appointments-dev.yaml

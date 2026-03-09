@@ -29,7 +29,7 @@ appointments/
 │
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml              # CI/CD pipeline
+│       └── appointments-ci-cd.yaml              # CI/CD pipeline
 │
 ├── manifests/
 │   └── appointments-dev.yaml       # Kubernetes deployment manifest
@@ -198,7 +198,7 @@ The project uses **GitHub Actions** to automatically build, push, and deploy the
 Workflow file:
 
 ```
-.github/workflows/deploy.yml
+.github/workflows/appointments-ci-cd.yaml
 ```
 
 The pipeline triggers when:
